@@ -1,152 +1,187 @@
 import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { FaArrowRight, FaGithub } from 'react-icons/fa';
+import { motion, useMotionValue, useSpring, useTransform, AnimatePresence } from 'framer-motion';
+import { FaGithub, FaArrowRight, FaCode } from 'react-icons/fa';
+import { SiReact, SiNextdotjs, SiTailwindcss, SiNodedotjs } from 'react-icons/si';
+import fotoku from '../assets/images/fotoku.jpg';
 
-// Kata-kata yang akan berganti otomatis
-const titles = ["Fullstack Developer", "UI/UX Enthusiast", "Problem Solver", "Tech Explorer"];
+const titles = ["Fullstack Developer", "UI/UX Enthusiast", "Tech Explorer"];
 
 const Hero = () => {
-  const [index, setIndex] = useState(0);
+  // --- PHYSICS SETUP ---
+  const x = useMotionValue(0);
+  const y = useMotionValue(0);
+  const mouseX = useSpring(x, { stiffness: 300, damping: 30 });
+  const mouseY = useSpring(y, { stiffness: 300, damping: 30 });
+  const rotateX = useTransform(mouseY, [-0.5, 0.5], ["12deg", "-12deg"]);
+  const rotateY = useTransform(mouseX, [-0.5, 0.5], ["-12deg", "12deg"]);
+  const glareX = useTransform(mouseX, [-0.5, 0.5], ["0%", "100%"]);
+  const glareY = useTransform(mouseY, [-0.5, 0.5], ["0%", "100%"]);
 
-  // Logika untuk mengganti teks setiap 3 detik
+  function handleMouseMove(event) {
+    const rect = event.currentTarget.getBoundingClientRect();
+    const width = rect.width;
+    const height = rect.height;
+    const mouseXPos = event.clientX - rect.left;
+    const mouseYPos = event.clientY - rect.top;
+    x.set(mouseXPos / width - 0.5);
+    y.set(mouseYPos / height - 0.5);
+  }
+
+  function handleMouseLeave() {
+    x.set(0);
+    y.set(0);
+  }
+
+  const [index, setIndex] = useState(0);
   useEffect(() => {
-    const intervalId = setInterval(() => {
-      setIndex((prevIndex) => (prevIndex + 1) % titles.length);
+    const interval = setInterval(() => {
+      setIndex((prev) => (prev + 1) % titles.length);
     }, 3000);
-    return () => clearInterval(intervalId);
+    return () => clearInterval(interval);
   }, []);
 
-  // Varian animasi untuk Framer Motion
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    visible: {
-      opacity: 1,
-      transition: { staggerChildren: 0.3, delayChildren: 0.5 }
-    }
-  };
-
-  const childVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100 } }
-  };
-
   return (
-    <section className="relative min-h-screen flex items-center overflow-hidden bg-dark">
-      {/* --- BACKGROUND CANGGIH --- */}
-      <div className="absolute inset-0 w-full h-full z-0 pointer-events-none">
-        {/* Grid Pattern halus */}
-        <div className="absolute inset-0 bg-grid-white/10 bg-[size:40px_40px] opacity-20" />
-        {/* Efek Vignette (pinggiran gelap) */}
-        <div className="absolute inset-0 bg-dark/80 bg-gradient-to-t from-dark via-dark/50 to-transparent" />
-        
-        {/* Bola Cahaya (Glow Orbs) */}
-        <motion.div 
-          animate={{ x: [0, 100, 0], y: [0, -50, 0] }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-          className="absolute top-1/4 left-1/4 w-96 h-96 bg-accent/40 rounded-full blur-[150px] -z-10" 
-        />
-        <motion.div 
-          animate={{ x: [0, -100, 0], y: [0, 50, 0] }}
-          transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
-          className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/30 rounded-full blur-[150px] -z-10" 
-        />
+    <section 
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
+      className="relative min-h-screen flex items-center justify-center overflow-hidden bg-[#050505] pt-20 perspective-1000"
+    >
+      
+      {/* --- BACKGROUND: ELECTRIC BLUE THEME --- */}
+      <div className="absolute inset-0 z-0 pointer-events-none overflow-hidden">
+         {/* Blob Biru Tua Kiri */}
+         <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-blue-900/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+         {/* Blob Cyan Kanan */}
+         <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-cyan-900/20 rounded-full blur-[120px] animate-pulse-slow"></div>
+         {/* Noise Texture */}
+         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-10 mix-blend-overlay"></div>
       </div>
 
-
-      {/* --- KONTEN UTAMA --- */}
-      <div className="max-w-7xl mx-auto px-6 z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full pt-20 lg:pt-0">
+      <div className="max-w-7xl mx-auto px-6 z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center w-full">
         
-        {/* BAGIAN KIRI: TEKS */}
-        <motion.div 
-          variants={containerVariants}
-          initial="hidden"
-          animate="visible"
-          className="text-left"
-        >
-          {/* Badge Kecil */}
-          <motion.div variants={childVariants} className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 mb-6 backdrop-blur-sm">
-             <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse"/>
-             <span className="text-sm text-gray-300 font-medium">Available for work</span>
-          </motion.div>
+        {/* === LEFT: TEXT CONTENT === */}
+        <div className="order-2 lg:order-1 text-center lg:text-left">
+           
+           {/* Badge Status (Cyan/Teal) */}
+           <motion.div 
+             initial={{ opacity: 0, y: 10 }}
+             animate={{ opacity: 1, y: 0 }}
+             className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-cyan-500/30 bg-cyan-500/10 backdrop-blur-md mb-6"
+           >
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+              </span>
+              <span className="text-sm font-bold text-cyan-200 tracking-wide">AVAILABLE FOR WORK</span>
+           </motion.div>
 
-          {/* Nama */}
-          <motion.h2 variants={childVariants} className="text-xl text-accent font-semibold tracking-wider mb-2">
-            HELLO, I'M FERDI
-          </motion.h2>
+           <h1 className="text-5xl sm:text-6xl md:text-7xl font-black text-white mb-6 leading-tight tracking-tight">
+             Building <br/>
+             {/* Gradasi Biru ke Cyan (Lebih Cowok) */}
+             <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-500 via-cyan-400 to-teal-300 animate-gradient-x">
+               Digital Future.
+             </span>
+           </h1>
 
-          {/* Judul Utama dengan Efek Typewriter */}
-          <div className="h-20 md:h-24 mb-6 relative overflow-hidden">
-            <AnimatePresence mode='wait'>
-              <motion.h1
-                key={titles[index]}
-                initial={{ y: 50, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -50, opacity: 0 }}
-                transition={{ duration: 0.5, ease: "easeInOut" }}
-                className="text-5xl md:text-7xl font-extrabold leading-tight absolute top-0 left-0 w-full whitespace-nowrap bg-gradient-to-r from-white via-gray-200 to-gray-500 bg-clip-text text-transparent"
-              >
-                {titles[index]}
-              </motion.h1>
-            </AnimatePresence>
-          </div>
+           <div className="h-8 mb-8 relative overflow-hidden flex justify-center lg:justify-start">
+             <AnimatePresence mode='wait'>
+               <motion.p 
+                 key={index}
+                 initial={{ y: 20, opacity: 0 }}
+                 animate={{ y: 0, opacity: 1 }}
+                 exit={{ y: -20, opacity: 0 }}
+                 transition={{ duration: 0.3 }}
+                 className="text-xl text-gray-300 font-medium"
+               >
+                 I am a <span className="text-white font-bold border-b-2 border-cyan-500">{titles[index]}</span>
+               </motion.p>
+             </AnimatePresence>
+           </div>
 
-          {/* Deskripsi */}
-          <motion.p variants={childVariants} className="text-gray-400 text-lg max-w-xl leading-relaxed mb-8">
-            Membangun pengalaman digital yang imersif dengan kode yang bersih dan desain yang modern. Fokus pada performa dan detail estetika.
-          </motion.p>
-
-          {/* Tombol CTA */}
-          <motion.div variants={childVariants} className="flex flex-wrap gap-4">
-            <button className="group px-8 py-4 bg-accent hover:bg-indigo-600 text-white rounded-full font-bold transition-all flex items-center gap-2 shadow-[0_0_30px_rgba(99,102,241,0.3)] hover:shadow-[0_0_50px_rgba(99,102,241,0.6)] hover:scale-105">
-              Lihat Projects
-              <FaArrowRight className="group-hover:translate-x-1 transition-transform" />
-            </button>
-            
-            <button className="group px-8 py-4 bg-white/5 border border-white/10 hover:bg-white/10 hover:border-white/30 text-white rounded-full font-bold transition-all flex items-center gap-2 backdrop-blur-md">
-              <FaGithub size={20}/>
-              Github Profile
-            </button>
-          </motion.div>
-        </motion.div>
+           <div className="flex flex-wrap gap-4 justify-center lg:justify-start">
+              {/* Tombol Gradient Biru */}
+              <button className="px-8 py-3 bg-gradient-to-r from-blue-600 to-cyan-600 text-white font-bold rounded-full shadow-lg shadow-blue-500/30 hover:scale-105 transition-transform flex items-center gap-2">
+                 View Projects <FaArrowRight />
+              </button>
+              <button className="px-8 py-3 bg-white/5 border border-white/10 text-white font-bold rounded-full hover:bg-white/10 transition-colors flex items-center gap-2">
+                 <FaGithub /> GitHub
+              </button>
+           </div>
+        </div>
 
 
-        {/* BAGIAN KANAN: VISUAL ABSTRAK (Pengganti Foto) */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1, delay: 0.5, type: "spring" }}
-          className="relative hidden lg:flex justify-center items-center h-[500px]"
-        >
-           {/* Elemen Visual Abstrak Berputar */}
-           <div className="relative w-[400px] h-[400px]">
-              {/* Lingkaran Luar Berputar Pelan */}
-              <div className="absolute inset-0 border border-accent/30 rounded-full animate-slow-spin" style={{ borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%' }}></div>
-              <div className="absolute inset-4 border border-secondary/30 rounded-full animate-reverse-slow-spin" style={{ borderRadius: '60% 40% 30% 70% / 50% 40% 50% 60%' }}></div>
-              
-              {/* Kotak Kaca di Tengah */}
-              <div className="absolute inset-20 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-xl rounded-3xl border border-white/20 flex items-center justify-center shadow-2xl z-10 rotate-12 hover:rotate-0 transition-all duration-700 group overflow-hidden">
-                  <div className="absolute inset-0 bg-gradient-to-r from-accent/20 to-secondary/20 opacity-0 group-hover:opacity-100 transition-opacity duration-700"></div>
-                  {/* Ilustrasi Kode Sederhana di dalam kotak */}
-                  <div className="text-left p-6 text-sm font-mono text-gray-300 relative z-20">
-                    <p><span className="text-accent">const</span> <span className="text-secondary">developer</span> = {`{`}</p>
-                    <p className="pl-4">name: <span className="text-green-400">'Ferdi'</span>,</p>
-                    <p className="pl-4">skills: [<span className="text-orange-400">'React'</span>, <span className="text-orange-400">'Node'</span>],</p>
-                    <p className="pl-4">hardWorker: <span className="text-accent">true</span></p>
-                    <p>{`}`};</p>
-                    <p className="mt-4 text-gray-500">// Siap menciptakan</p>
-                    <p className="text-gray-500">// sesuatu yang luar biasa.</p>
-                  </div>
+        {/* === RIGHT: HD 3D CARD (Blue Accent) === */}
+        <div className="order-1 lg:order-2 relative flex justify-center items-center h-[550px] perspective-1000">
+           
+           <motion.div
+             style={{ rotateX, rotateY, transformStyle: "preserve-3d" }}
+             className="relative w-[320px] h-[480px] bg-[#0a0a0a] rounded-[30px] border border-white/10 shadow-2xl shadow-black/60 group"
+           >
+              {/* Glare Effect */}
+              <motion.div 
+                 style={{ background: `radial-gradient(circle at ${glareX} ${glareY}, rgba(255,255,255,0.15), transparent 80%)` }}
+                 className="absolute inset-0 rounded-[30px] pointer-events-none z-50 mix-blend-overlay opacity-100"
+              />
+
+              <div style={{ transform: "translateZ(30px)" }} className="absolute inset-0 flex flex-col items-center p-6">
+                 
+                 <div className="w-full h-[60%] relative rounded-2xl overflow-hidden mb-6 shadow-lg border border-white/5">
+                    <img src={fotoku} alt="Profile" className="w-full h-full object-cover transform transition-transform duration-700 group-hover:scale-110" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent"></div>
+                    
+                    <div className="absolute bottom-4 left-4">
+                       <h2 className="text-2xl font-black text-white drop-shadow-md">FERDI.</h2>
+                       <p className="text-xs text-cyan-400 font-mono tracking-widest">FULLSTACK DEV</p>
+                    </div>
+                 </div>
+
+                 <div className="w-full grid grid-cols-4 gap-3">
+                    <TechIcon icon={<SiReact/>} color="text-[#61DAFB]" label="React" />
+                    <TechIcon icon={<SiNextdotjs/>} color="text-white" label="Next" />
+                    <TechIcon icon={<SiTailwindcss/>} color="text-[#06B6D4]" label="Tailwind" />
+                    <TechIcon icon={<SiNodedotjs/>} color="text-[#339933]" label="Node" />
+                 </div>
+
+                 <div className="mt-auto w-full pt-4 border-t border-white/10 flex justify-between items-center">
+                    <div className="flex -space-x-2">
+                       <div className="w-8 h-8 rounded-full bg-blue-600 border-2 border-black flex items-center justify-center text-xs text-white">TS</div>
+                       <div className="w-8 h-8 rounded-full bg-cyan-600 border-2 border-black flex items-center justify-center text-xs text-white">JS</div>
+                    </div>
+                    <div className="text-right">
+                       <p className="text-[10px] text-gray-500 uppercase font-bold">Projects</p>
+                       <p className="text-lg font-bold text-white">20+</p>
+                    </div>
+                 </div>
               </div>
 
-              {/* Partikel Melayang Kecil */}
-              <motion.div animate={{ y: [-20, 20, -20] }} transition={{ duration: 4, repeat: Infinity }} className="absolute top-10 right-10 w-12 h-12 bg-accent/30 backdrop-blur-md rounded-xl border border-white/20 z-0" />
-              <motion.div animate={{ y: [20, -20, 20] }} transition={{ duration: 5, repeat: Infinity }} className="absolute bottom-10 left-10 w-16 h-16 bg-secondary/30 backdrop-blur-md rounded-full border border-white/20 z-0" />
-           </div>
-        </motion.div>
+              {/* Floating Badges (Blue Accent) */}
+              <motion.div 
+                 style={{ transform: "translateZ(70px)" }}
+                 className="absolute -left-6 top-10 bg-[#111] border border-cyan-500/30 p-3 rounded-2xl shadow-xl flex gap-3 items-center"
+                 animate={{ y: [-5, 5, -5] }}
+                 transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
+              >
+                 <div className="bg-cyan-500/20 p-2 rounded-lg text-cyan-400"><FaCode /></div>
+                 <div>
+                    <p className="text-[10px] text-gray-500 font-bold uppercase">Code</p>
+                    <p className="text-xs font-bold text-white">Clean</p>
+                 </div>
+              </motion.div>
+
+           </motion.div>
+        </div>
 
       </div>
     </section>
   );
 };
+
+const TechIcon = ({ icon, color, label }) => (
+  <div className="group/icon flex flex-col items-center gap-1 cursor-pointer">
+    <div className={`p-3 bg-white/5 rounded-xl border border-white/5 hover:bg-white/10 transition-colors ${color} text-xl`}>
+      {icon}
+    </div>
+  </div>
+);
 
 export default Hero;

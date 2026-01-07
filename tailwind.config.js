@@ -7,13 +7,19 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Ini definisi warna custom kita
-        dark: "#0a0a0a", 
+        // Ganti 'dark' dengan warna Deep Space Black (Hitam kebiruan sangat gelap)
+        dark: "#030014", 
+        // Warna hitam pekat untuk kartu
+        card: "#0f172a",
         accent: "#6366f1",
         secondary: "#a855f7",
       },
       fontFamily: {
         sans: ['Inter', 'sans-serif'],
+      },
+      // Tambahkan animasi kustom jika perlu
+      animation: {
+        'spin-slow': 'spin 20s linear infinite',
       }
     },
   },
